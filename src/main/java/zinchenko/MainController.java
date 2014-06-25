@@ -54,7 +54,7 @@ public class MainController {
     @Transactional
     public String getByIdQ(@PathVariable("id") Long id){
         System.out.println("getById()");
-        Bean bean = (Bean) sessionFactory.getCurrentSession().createQuery("from Bean b where b.id = :id").setLong("id", id).uniqueResult();
+        Bean bean = (Bean) sessionFactory.getCurrentSession().createQuery("from Bean b where b.id = :id").setCacheable(true).setLong("id", id).uniqueResult();
         return bean.toString();
     }
 
