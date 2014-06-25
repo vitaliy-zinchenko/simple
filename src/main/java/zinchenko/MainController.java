@@ -25,7 +25,7 @@ public class MainController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public String session(HttpServletRequest request, HttpServletResponse response){
+    public String session(HttpServletRequest request){
         System.out.println("session()");
         HttpSession session = request.getSession();
         return session.getId();
@@ -34,17 +34,34 @@ public class MainController {
     @RequestMapping(value = "/get")
     @ResponseBody
     @Transactional
-    public String get(HttpServletRequest request, HttpServletResponse response){
+    public String get(){
         System.out.println("get()");
         List<Bean> beans = sessionFactory.getCurrentSession().createCriteria(Bean.class).list();
         return beans.toString();
     }
 
+    @RequestMapping(value = "/getById/{id}")
+    @ResponseBody
+    @Transactional
+    public String getById(@PathVariable("id") Long id){
+        System.out.println("getById()");
+        Bean bean = (Bean) sessionFactory.getCurrentSession().load(Bean.class, id);
+        return bean.toString();
+    }
+
+    @RequestMapping(value = "/getByIdQ/{id}")
+    @ResponseBody
+    @Transactional
+    public String getByIdQ(@PathVariable("id") Long id){
+        System.out.println("getById()");
+        Bean bean = (Bean) sessionFactory.getCurrentSession().createQuery("from Bean b where b.id = :id").setLong("id", id).uniqueResult();
+        return bean.toString();
+    }
+
     @RequestMapping(value = "/fill/{value}")
     @ResponseBody
     @Transactional
-    public String fill(HttpServletRequest request, HttpServletResponse response,
-                       @PathVariable("value") String value){
+    public String fill(@PathVariable("value") String value){
         System.out.println("fill()");
         sessionFactory.getCurrentSession().save(new Bean(value));
         return "filled";
