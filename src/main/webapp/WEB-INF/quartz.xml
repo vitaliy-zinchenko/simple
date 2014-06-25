@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="hibernate.xml"/>
+
+    <bean id="runJob" class="zinchenko.Job"></bean>
+
+    <bean id="job" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="runJob"/>
+        <property name="targetMethod" value="run"/>
+    </bean>
+
+    <bean id="jobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="job"/>
+        <property name="cronExpression" value="0/5 * * * * ?"/>
+    </bean>
+
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="jobDetails">
+            <list>
+                <ref bean="job"/>
+            </list>
+        </property>
+
+        <property name="triggers">
+            <list>
+                <ref bean="jobTrigger"/>
+            </list>
+        </property>
+        <property name="configLocation" value="WEB-INF/quartz.properties"/>
+    </bean>
+
+</beans>
