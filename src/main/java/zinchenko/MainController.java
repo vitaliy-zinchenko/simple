@@ -17,7 +17,6 @@ import java.util.List;
  * Created by zinchenko on 15.06.14.
  */
 @Controller
-@RequestMapping("/controller")
 public class MainController {
 
     @Autowired
@@ -40,12 +39,21 @@ public class MainController {
         return beans.toString();
     }
 
-    @RequestMapping(value = "/getById/{id}")
+    @RequestMapping(value = "/getByIdLoad/{id}")
     @ResponseBody
     @Transactional
-    public String getById(@PathVariable("id") Long id){
+    public String getByIdLoad(@PathVariable("id") Long id){
         System.out.println("getById()");
         Bean bean = (Bean) sessionFactory.getCurrentSession().load(Bean.class, id);
+        return bean.toString();
+    }
+
+    @RequestMapping(value = "/getByIdGet/{id}")
+    @ResponseBody
+    @Transactional
+    public String getByIdGet(@PathVariable("id") Long id){
+        System.out.println("getById()");
+        Bean bean = (Bean) sessionFactory.getCurrentSession().get(Bean.class, id);
         return bean.toString();
     }
 
@@ -65,6 +73,15 @@ public class MainController {
         System.out.println("fill()");
         sessionFactory.getCurrentSession().save(new Bean(value));
         return "filled";
+    }
+
+    @RequestMapping(value = "/getByIdSubBean/{id}")
+    @ResponseBody
+    @Transactional
+    public String getByIdSubBean(@PathVariable("id") Long id){
+        System.out.println("getById()");
+        Bean bean = (Bean) sessionFactory.getCurrentSession().get(SubBean.class, id);
+        return bean.toString();
     }
 
     public SessionFactory getSessionFactory() {

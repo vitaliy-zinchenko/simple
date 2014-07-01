@@ -6,6 +6,19 @@
     <display-name>Archetype Created Web Application</display-name>
     <distributable/>
 
+    <!-- JavaMelody -->
+    <filter>
+        <filter-name>monitoring</filter-name>
+        <filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>monitoring</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <listener>
+        <listener-class>net.bull.javamelody.SessionListener</listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>mainServlet</servlet-name>
         <servlet-class>zinchenko.MainServlet</servlet-class>
