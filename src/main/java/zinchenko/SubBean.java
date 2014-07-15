@@ -7,11 +7,17 @@ import javax.persistence.Table;
 
 /**
  * Created by zinchenko on 29.06.14.
+ *
+ * task-1
+ *
  */
 @Entity
 @Table(name = "sub_bean")
 public class SubBean {
 
+    /**
+     * task 1
+     */
     @Id
     @Column(name = "sub_bean_id")
     private Long id;
