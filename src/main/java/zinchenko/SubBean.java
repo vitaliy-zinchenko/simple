@@ -9,6 +9,7 @@ import javax.persistence.Table;
  * Created by zinchenko on 29.06.14.
  *
  * task-1
+ * task-2
  *
  */
 @Entity
