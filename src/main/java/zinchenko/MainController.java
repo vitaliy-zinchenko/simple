@@ -84,6 +84,36 @@ public class MainController {
         return bean.toString();
     }
 
+    @RequestMapping(value = "/saveSub/{value}")
+    @ResponseBody
+    @Transactional
+    public String saveSub(@PathVariable("value") String value){
+        System.out.println("saveSub()");
+        SubBean subBean = new SubBean();
+        subBean.setValue(value);
+        Long id = (Long) sessionFactory.getCurrentSession().save(subBean);
+        System.out.println("end saveSub()");
+        return String.valueOf(id);
+    }
+
+    @RequestMapping(value = "/test/{id}/{value}")
+    @ResponseBody
+    @Transactional
+    public String test(@PathVariable("id") Long id, @PathVariable("value") String value) throws InterruptedException {
+        System.out.println("test()");
+
+
+        SubBean subBean2 = (SubBean) sessionFactory.getCurrentSession().get(SubBean.class, id);
+//        subBean2.setId(id);
+        subBean2.setValue(value);
+        sessionFactory.getCurrentSession().update(subBean2);
+
+        System.out.println("updated");
+        Thread.sleep(3000);
+        System.out.println("exit test()");
+        return "OK";
+    }
+
     public SessionFactory getSessionFactory() {
         return sessionFactory;
     }

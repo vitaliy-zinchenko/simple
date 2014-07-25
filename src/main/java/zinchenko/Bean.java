@@ -21,6 +21,10 @@ public class Bean {
 
     private String value;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sub_bean_id")
+    private SubBean subBean;
+
     public Bean() {
     }
 
@@ -52,4 +56,11 @@ public class Bean {
         this.value = value;
     }
 
+    public SubBean getSubBean() {
+        return subBean;
+    }
+
+    public void setSubBean(SubBean subBean) {
+        this.subBean = subBean;
+    }
 }
