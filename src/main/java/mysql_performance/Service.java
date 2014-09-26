@@ -5,6 +5,7 @@ import mysql_performance.entity.Role;
 import mysql_performance.entity.User;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +21,13 @@ import java.util.Random;
 /**
  * Created by zinchenko on 18.09.14.
  */
+//@org.springframework.stereotype.Service
 public class Service {
 
 
-    private static final int ADMINS_NUMBER = 10;
-    private static final int USERS_NUMBER = 500;
-    private static final int ITERATIONS = 100;
+    private static final int ADMINS_NUMBER = 2;
+    private static final int USERS_NUMBER = 5;
+    private static final int ITERATIONS = 1;
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -100,8 +102,8 @@ public class Service {
         createPermissions(permissionsKeys, permissions);
         createPermissions(customPermissionsKeys, customPermissions);
         createRoles();
-        createAdmins();
-        createUsers();
+//        createAdmins();
+//        createUsers();
     }
 
     private void createPermissions(List<String> permissionsKeys, List<Permission> permissions) {
@@ -124,15 +126,17 @@ public class Service {
         if (role == null) {
             role = new Role();
             role.setName(roleNames.get(0));
-            role.getPermissions().add(permissions.get(0));
-            role.getPermissions().add(permissions.get(1));
-            role.getPermissions().add(permissions.get(2));
-            role.getPermissions().add(permissions.get(3));
-            role.getPermissions().add(permissions.get(4));
-            role.getPermissions().add(permissions.get(5));
-            role.getPermissions().add(permissions.get(6));
-            role.getPermissions().add(permissions.get(7));
-            save(role);
+//            role.getPermissions().add(permissions.get(0));
+//            role.getPermissions().add(permissions.get(1));
+//            role.getPermissions().add(permissions.get(2));
+//            role.getPermissions().add(permissions.get(3));
+//            role.getPermissions().add(permissions.get(4));
+//            role.getPermissions().add(permissions.get(5));
+//            role.getPermissions().add(permissions.get(6));
+//            role.getPermissions().add(permissions.get(7));
+            Permission permission = (Permission) sessionFactory.getCurrentSession().get(Permission.class, 1L);
+            role.getPermissions().add(permission);
+            sessionFactory.getCurrentSession().save(role);
         }
         roles.add(role);
 
@@ -142,7 +146,7 @@ public class Service {
             role.setName(roleNames.get(1));
             role.getPermissions().add(permissions.get(0));
             role.getPermissions().add(permissions.get(4));
-            save(role);
+            sessionFactory.getCurrentSession().save(role);
         }
         roles.add(role);
 
@@ -216,6 +220,56 @@ public class Service {
 //        newProfile.setUserId(4);
 
         sessionFactory.getCurrentSession().save(newProfile);
+    }
+
+    @Transactional
+    public void fillNewUser() {
+        Session session = sessionFactory.getCurrentSession();
+        for (int i = 0; i < 1000000; i++) {
+            NewUser newUser = new NewUser();
+            newUser.setPassword("p-"+System.currentTimeMillis());
+            session.save(newUser);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public NewUser getNewUserReadOnly(){
+        return getNewUser();
+    }
+
+    @Transactional
+    public NewUser getNewUserNotReadOnly(){
+        return getNewUser();
+    }
+
+
+    @Transactional
+    public void t(){
+        Role role = new Role();
+        role.setName("nnnn-"+System.currentTimeMillis());
+        role.getPermissions().add(new Permission("p-"+System.currentTimeMillis()));
+        role.getPermissions().add(new Permission("p-"+System.currentTimeMillis()));
+        role.getPermissions().add(new Permission("p-"+System.currentTimeMillis()));
+        sessionFactory.getCurrentSession().save(role);
+    }
+
+    @Transactional
+    public void t2(){
+        Role role = new Role();
+        role.setName("nnnn-"+System.currentTimeMillis());
+        Permission permission = (Permission) sessionFactory.getCurrentSession().get(Permission.class, 1L);
+        role.getPermissions().add(permission);
+        sessionFactory.getCurrentSession().save(role);
+    }
+
+    @Transactional
+    public  void tGet(){
+        List<Role> roleList = sessionFactory.getCurrentSession().createCriteria(Role.class).list();
+        System.out.println("as");
+    }
+
+    private NewUser getNewUser(){
+        return (NewUser) sessionFactory.getCurrentSession().createQuery("from NewUser where password = 'p-1411580902721'").uniqueResult();
     }
 
     private void save(Object o) {

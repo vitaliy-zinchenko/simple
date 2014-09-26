@@ -1,6 +1,11 @@
 package mysql_performance.entity;
 
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.CascadeType;
+
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +24,8 @@ public class Role {
     @Column(name = "name")
     private String name;
 
-    @OneToMany
+    @ManyToMany()
+    @Cascade(CascadeType.ALL)
     @JoinTable(name = "role_permission",
             joinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "permission_id", referencedColumnName = "id")})

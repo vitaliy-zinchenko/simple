@@ -61,6 +61,7 @@
     <orderEntry type="library" name="Maven: org.quartz-scheduler:quartz:1.8.6" level="project" />
     <orderEntry type="library" name="Maven: commons-dbcp:commons-dbcp:1.4" level="project" />
     <orderEntry type="library" name="Maven: commons-pool:commons-pool:1.5.4" level="project" />
+    <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.31" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-orm:4.0.1.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-jdbc:4.0.1.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.hibernate:hibernate-core:4.3.1.Final" level="project" />
@@ -83,6 +84,8 @@
     <orderEntry type="library" name="Maven: com.hazelcast:hazelcast-hibernate4:3.2.2" level="project" />
     <orderEntry type="library" name="Maven: net.bull.javamelody:javamelody-core:1.51.0" level="project" />
     <orderEntry type="library" name="Maven: org.jrobin:jrobin:1.5.9" level="project" />
+    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
+    <orderEntry type="library" name="Maven: commons-io:commons-io:2.4" level="project" />
   </component>
 </module>
 

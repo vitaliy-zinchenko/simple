@@ -1,11 +1,11 @@
 <component name="ArtifactManager">
-  <artifact type="exploded-war" name="simple:war exploded">
-    <output-path>$PROJECT_DIR$/target/simple</output-path>
+  <artifact type="exploded-war" name="api:war exploded">
+    <output-path>$PROJECT_DIR$/api/target/api</output-path>
     <root id="root">
-      <element id="javaee-facet-resources" facet="simple/web/Web" />
+      <element id="javaee-facet-resources" facet="api/web/Web" />
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
-          <element id="module-output" name="simple" />
+          <element id="module-output" name="api" />
         </element>
         <element id="directory" name="lib">
           <element id="library" level="project" name="Maven: org.dbunit:dbunit:2.4.9" />
