@@ -61,7 +61,7 @@
     <orderEntry type="library" name="Maven: org.quartz-scheduler:quartz:1.8.6" level="project" />
     <orderEntry type="library" name="Maven: commons-dbcp:commons-dbcp:1.4" level="project" />
     <orderEntry type="library" name="Maven: commons-pool:commons-pool:1.5.4" level="project" />
-    <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.31" level="project" />
+    <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.33" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-orm:4.0.1.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-jdbc:4.0.1.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.hibernate:hibernate-core:4.3.1.Final" level="project" />

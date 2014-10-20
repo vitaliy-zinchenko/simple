@@ -16,13 +16,16 @@ public class Main {
 
         Service service = (Service)appContext.getBean("service");
 //        service.saveTest();
-        service.fill();
+//        service.fill();
 //        service.fillNewUser();
 
 //        service.t();
 //        service.t2();
-//        service.tGet();
 
+
+
+        service.tGet();
+//        service.tSave();
 
 
 

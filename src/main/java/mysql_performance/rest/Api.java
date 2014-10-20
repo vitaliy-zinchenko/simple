@@ -23,6 +23,13 @@ public class Api {
         System.out.println("get");
     }
 
+    @RequestMapping("/save")
+    @ResponseBody
+    public void save() {
+        service.tSave();
+        System.out.println("save");
+    }
+
     public Service getService() {
         return service;
     }

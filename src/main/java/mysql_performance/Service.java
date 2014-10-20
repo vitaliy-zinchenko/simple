@@ -9,6 +9,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -262,10 +263,22 @@ public class Service {
         sessionFactory.getCurrentSession().save(role);
     }
 
-    @Transactional
+    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public  void tGet(){
         List<Role> roleList = sessionFactory.getCurrentSession().createCriteria(Role.class).list();
         System.out.println("as");
+    }
+
+    @Transactional
+    public  void tSave(){
+//        Role role = new Role();
+//        role.setName("n-"+System.currentTimeMillis());
+//        sessionFactory.getCurrentSession().save(role);
+//        sessionFactory.getCurrentSession().flush();
+
+        List<Role> roleList = sessionFactory.getCurrentSession().createCriteria(Role.class).list();
+        roleList.get(0).setName("nnnn-"+System.currentTimeMillis());
+
     }
 
     private NewUser getNewUser(){
