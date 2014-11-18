@@ -55,9 +55,12 @@ public class RemoteMap<K, V> implements Map<K, V> {
 
     @Override
     public int size() {
-        try(Jedis jedis = getJedis()) {
-            return jedis.hlen(mapName).intValue();
-        }
+        return executeCommand(new Command<Integer>() {
+            @Override
+            public Integer execute(Jedis jedis) throws Exception {
+                return jedis.hlen(mapName).intValue();
+            }
+        });
     }
 
     @Override
@@ -66,10 +69,13 @@ public class RemoteMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    public boolean containsKey(Object key) {
-        try(Jedis jedis = getJedis()) {
-            return jedis.hexists(getMapNameBytes(), serializer.serialize(key));
-        }
+    public boolean containsKey(final Object key) {
+        return executeCommand(new Command<Boolean>() {
+            @Override
+            public Boolean execute(Jedis jedis) throws Exception {
+                return jedis.hexists(getMapNameBytes(), serializer.serialize(key));
+            }
+        });
     }
 
     @Override
@@ -78,140 +84,135 @@ public class RemoteMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    public V get(Object key) {
-        try(Jedis jedis = getJedis()) {
-            byte[] value = jedis.hget(getMapNameBytes(), serialize(key));
-            return deserializeValue(value);
-        }
-    }
-
-    @Override
-    public V put(K key, V value) {
-        try(Jedis jedis = getJedis()) {
-            byte[] keyBytes =  serialize(key);
-            byte[] valueBytes =  serializer.serialize(value);
-
-            byte[] previous = jedis.hget(getMapNameBytes(), keyBytes);
-
-            jedis.hset(getMapNameBytes(), keyBytes, valueBytes);
-            return previous == null ? null : (V) serializer.deserialize(previous);
-        }
-    }
-
-    @Override
-    public V remove(Object key) {
-        try(Jedis jedis = getJedis()) {
-            byte[] removed = jedis.hget(getMapNameBytes(), serializer.serialize(key));
-            return (V) serializer.deserialize(removed);
-        }
-    }
-
-    @Override
-    public void putAll(Map<? extends K, ? extends V> m) {
-        try(Jedis jedis = getJedis()) {
-            Map<byte[], byte[]> map = new HashMap<>();
-            for(Entry<? extends K, ? extends V> entry: m.entrySet()) {
-                byte[] key = serializer.serialize(entry.getKey());
-                byte[] value = serializer.serialize(entry.getValue());
-                map.put(key, value);
+    public V get(final Object key) {
+        return executeCommand(new Command<V>() {
+            @Override
+            public V execute(Jedis jedis) throws Exception {
+                byte[] value = jedis.hget(getMapNameBytes(), serialize(key));
+                return deserializeValue(value);
             }
-            jedis.hmset(getMapNameBytes(), map);
-        }
+        });
+    }
+
+    @Override
+    public V put(final K key, final V value) {
+        return executeCommand(new Command<V>() {
+            @Override
+            public V execute(Jedis jedis) throws Exception {
+                byte[] keyBytes =  serialize(key);
+                byte[] valueBytes =  serializer.serialize(value);
+
+                byte[] previous = jedis.hget(getMapNameBytes(), keyBytes);
+
+                jedis.hset(getMapNameBytes(), keyBytes, valueBytes);
+                return previous == null ? null : (V) serializer.deserialize(previous);
+            }
+        });
+    }
+
+    @Override
+    public V remove(final Object key) {
+        return executeCommand(new Command<V>() {
+            @Override
+            public V execute(Jedis jedis) throws Exception {
+                byte[] removed = jedis.hget(getMapNameBytes(), serializer.serialize(key));
+                return (V) serializer.deserialize(removed);
+            }
+        });
+    }
+
+    @Override
+    public void putAll(final Map<? extends K, ? extends V> m) {
+        executeCommand(new Command<Void>() {
+            @Override
+            public Void execute(Jedis jedis) throws Exception {
+                Map<byte[], byte[]> map = new HashMap<>();
+                for(Entry<? extends K, ? extends V> entry: m.entrySet()) {
+                    byte[] key = serializer.serialize(entry.getKey());
+                    byte[] value = serializer.serialize(entry.getValue());
+                    map.put(key, value);
+                }
+                jedis.hmset(getMapNameBytes(), map);
+                return null;
+            }
+        });
     }
 
     @Override
     public void clear() {
-        try(Jedis jedis = getJedis()) {
-            jedis.del(mapName);
-        }
+        executeCommand(new Command<Void>() {
+            @Override
+            public Void execute(Jedis jedis) throws Exception {
+                jedis.del(mapName);
+                return null;
+            }
+        });
     }
 
     @Override
     public Set<K> keySet() {
-        try(Jedis jedis = getJedis()) {
-            Set<byte[]> set = jedis.hkeys(getMapNameBytes());
-            Set<K> result = new HashSet<K>();
-            for(byte[] item: set) {
-                K k = (K) serializer.deserialize(item);
-                result.add(k);
+        return executeCommand(new Command<Set<K>>() {
+            @Override
+            public Set<K> execute(Jedis jedis) throws Exception {
+                Set<byte[]> set = jedis.hkeys(getMapNameBytes());
+                Set<K> result = new HashSet<K>();
+                for(byte[] item: set) {
+                    K k = (K) serializer.deserialize(item);
+                    result.add(k);
+                }
+                return result;
             }
-            return result;
-        }
+        });
     }
 
     @Override
     public Collection<V> values() {
-        try(Jedis jedis = getJedis()) {
-            List<byte[]> values = jedis.hvals(getMapNameBytes());
-            List result = new ArrayList<>();
-            for(byte[] item: values) {
-                result.add(serializer.deserialize(item));
+        return executeCommand(new Command<Collection<V>>() {
+            @Override
+            public Collection<V> execute(Jedis jedis) throws Exception {
+                List<byte[]> values = jedis.hvals(getMapNameBytes());
+                List result = new ArrayList<>();
+                for(byte[] item: values) {
+                    result.add(serializer.deserialize(item));
+                }
+                return result;
             }
-            return result;
-        }
+        });
     }
 
     @Override
     public Set<Entry<K, V>> entrySet() {
-        try(Jedis jedis = getJedis()) {
-            Map<byte[], byte[]> map = jedis.hgetAll(getMapNameBytes());
-            Set<Entry<K, V>> result = new HashSet<Entry<K, V>>();
-            for(Entry<byte[], byte[]> mapEntry: map.entrySet()) {
-                K k = (K) serializer.deserialize(mapEntry.getKey());
-                V v = (V) serializer.deserialize(mapEntry.getValue());
-                Entry entry = new AbstractMap.SimpleEntry<K, V>(k, v);
-                result.add(entry);
+        return executeCommand(new Command<Set<Entry<K, V>>>() {
+            @Override
+            public Set<Entry<K, V>> execute(Jedis jedis) throws Exception {
+                Map<byte[], byte[]> map = jedis.hgetAll(getMapNameBytes());
+                Set<Entry<K, V>> result = new HashSet<Entry<K, V>>();
+                for(Entry<byte[], byte[]> mapEntry: map.entrySet()) {
+                    K k = (K) serializer.deserialize(mapEntry.getKey());
+                    V v = (V) serializer.deserialize(mapEntry.getValue());
+                    Entry entry = new AbstractMap.SimpleEntry<K, V>(k, v);
+                    result.add(entry);
+                }
+                return result;
             }
-            return result;
-        }
+        });
     }
-
-//    public static class RemoteEntry<K, V> implements Map.Entry<K, V> {
-//
-//        private K k;
-//
-//        private V v;
-//
-//        @Override
-//        public K getKey() {
-//            return k;
-//        }
-//
-//        @Override
-//        public V getValue() {
-//            return v;
-//        }
-//
-//        @Override
-//        public V setValue(V value) {
-//            V old = v;
-//            v = value;
-//            return old;
-//        }
-//
-//        @Override
-//        public int hashCode() {
-//            return k.hashCode() + v.hashCode();
-//        }
-//
-//
-//        @Override
-//        public boolean equals(Object o) {
-//            if (this == o) return true;
-//            if (o == null || getClass() != o.getClass()) return false;
-//
-//            Entry entry = (Entry) o;
-//
-//            if (k != null ? !k.equals(entry.k) : entry.k != null) return false;
-//            if (v != null ? !v.equals(entry.v) : entry.v != null) return false;
-//
-//            return true;
-//        }
-//    }
-
 
     @Override
     public int hashCode() {
         return 29;
     }
+
+    protected <R> R executeCommand(Command<R> command) {
+        try(Jedis jedis = getJedis()) {
+            return command.execute(jedis);
+        } catch (Exception e) {
+            throw new UnexpectedRemoteException();
+        }
+    }
+
+    protected interface Command<R> {
+        R execute(Jedis jedis) throws Exception;
+    }
+
 }

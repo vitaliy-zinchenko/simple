@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task.xsd">
+
+
+
+
+    <task:annotation-driven executor="taskExecutor" exception-handler=""/>
+
+    <task:executor id="taskExecutor" pool-size="10" />
+
+    <bean id="exceptionHandler" class="multi.spring.ErrorHandler"/>
+
+    <bean id="b" class="multi.spring.Service">
+        <property name="asyncService" ref="asyncService"/>
+    </bean>
+
+    <bean id="asyncService" class="multi.spring.AsyncService"/>
+
+    <bean id="taskExecutor2" class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
+        <property name="corePoolSize" value="50" />
+        <property name="maxPoolSize" value="50" />
+        <property name="keepAliveSeconds" value="10" />
+        <!--<property name=""-->
+    </bean>
+
+</beans>

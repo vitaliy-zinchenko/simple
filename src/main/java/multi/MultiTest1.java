@@ -11,7 +11,7 @@ public class MultiTest1 {
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
 
-        t5();
+        t11();
 
     }
 
@@ -167,6 +167,152 @@ public class MultiTest1 {
         done.await();
 
         System.out.println("end");
+    }
+
+    static void t6() {
+        class Task6 implements Callable<Boolean> {
+
+            private String arg;
+
+            Task6(String arg) {
+                this.arg = arg;
+            }
+
+            @Override
+            public Boolean call() throws Exception {
+                if("f".equals(arg)) {
+                    System.out.println("going to make fail");
+                    throw new RuntimeException("BA-BAH!!");
+                }
+
+                if("e".equals(arg)) {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+
+        ExecutorService service = Executors.newFixedThreadPool(2);
+
+        System.out.println("submit");
+        Future<Boolean> future = service.submit(new Task6("f"));
+
+        try {
+            System.out.println("going to get");
+            future.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            System.out.println("EEEE");
+            e.printStackTrace();
+        }
+
+    }
+
+    static public class MySingleton {
+
+        private static MySingleton instance;
+
+        public static MySingleton getInstance() {
+
+            if (instance == null) {
+                synchronized (MySingleton.class) {
+                    if (instance == null)
+                        instance = new MySingleton();
+                }
+            }
+            return instance;
+        }
+    }
+
+    public static volatile Integer volatileInt = 0;
+
+    private static void t10() throws InterruptedException {
+        class Task10 implements Runnable {
+
+//            private volatile Integer i = 0;
+
+            @Override
+            public void run() {
+                MySingleton s = MySingleton.getInstance();
+                System.out.println(s);
+
+            }
+//                p();
+//
+//                volatileInt++;
+//
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                p();
+//            }
+
+            public void p() {
+                System.out.println(Thread.currentThread().getName() + " - i is " + volatileInt);
+            }
+        }
+
+        Task10 task1 = new Task10();
+//        task1.p();
+        Task10 task2 = new Task10();
+//        task2.p();
+
+        System.out.println("start1");
+        Thread thread1 = new Thread(task1);
+        thread1.start();
+
+        System.out.println("start2");
+        Thread thread2 = new Thread(task2);
+        thread2.start();
+
+        thread1.join();
+        thread2.join();
+
+//        task1.p();
+//        task2.p();
+
+    }
+
+    private static volatile int volatileIntT11 = 0;
+
+    private static void t11() {
+        Thread t1 = new Thread() {
+            @Override
+            public void run() {
+                int v1 = volatileIntT11;
+                while (true) {
+                    if(v1 != volatileIntT11) {
+                        System.out.println("volatileIntT11 from t1 = " + volatileIntT11);
+                        v1 = volatileIntT11;
+                    }
+                }
+            }
+        };
+
+        Thread t2 = new Thread() {
+            @Override
+            public void run() {
+                int v2 = volatileIntT11;
+                while(true) {
+                    ++volatileIntT11;
+                    System.out.println("incremented = " + volatileIntT11);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println();
+                }
+            }
+        };
+
+        t1.start();
+        t2.start();
     }
 
 }
