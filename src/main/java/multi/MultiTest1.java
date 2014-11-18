@@ -1,8 +1,14 @@
 package multi;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by zinchenko on 16.11.14.
@@ -11,7 +17,7 @@ public class MultiTest1 {
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
 
-        t11();
+        t15();
 
     }
 
@@ -211,6 +217,40 @@ public class MultiTest1 {
 
     }
 
+
+    static void t7() throws ExecutionException {
+        class ValidateException extends Exception {
+
+        }
+
+        class Task7 implements Callable<Void> {
+            @Override
+            public Void call() throws ValidateException {
+                System.out.println("call - "+Thread.currentThread());
+                if(true) {
+                    throw new ValidateException();
+                }
+                return null;
+            }
+        }
+
+        List<Task7> tasks = new ArrayList<>();
+
+        tasks.add(new Task7());
+        tasks.add(new Task7());
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        try {
+            List<Future<Void>> f = executorService.invokeAll(tasks);
+            f.get(0).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+
+    }
+
     static public class MySingleton {
 
         private static MySingleton instance;
@@ -278,16 +318,58 @@ public class MultiTest1 {
 
     }
 
+
+
+    private static Writer writer = null;
+
+    static {
+        try {
+            writer = new FileWriter("/home/zinchenko/work/log.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void write(String s) {
+        synchronized (writer) {
+            try {
+                writer.append(s);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private static volatile int volatileIntT11 = 0;
 
+    /**
+     *
+     t1 = 0v1=0 -> false
+     t1 = 0v1=0 -> false
+     t1 = 0v1=0 -> false
+     t1 = 0v1=0 -> false
+     going to increment = 0
+     t1 = 0v1=0 -> true
+     incremented = 1
+     volatileIntT11 from t1 = 1
+     t1 = 1v1=1 -> false
+     t1 = 1v1=1 -> false
+     t1 = 1v1=1 -> false
+     t1 = 1v1=1 -> false
+     t1 = 1v1=1 -> false
+     */
     private static void t11() {
         Thread t1 = new Thread() {
             @Override
             public void run() {
                 int v1 = volatileIntT11;
+
                 while (true) {
+                    write("\n t1 = " + volatileIntT11 + "v1=" + v1 + " -> " + (v1 != volatileIntT11));
+                    System.out.println("t1 = " + volatileIntT11 + "v1=" + v1 + " -> " + (v1 != volatileIntT11));
                     if(v1 != volatileIntT11) {
                         System.out.println("volatileIntT11 from t1 = " + volatileIntT11);
+                        write("\n volatileIntT11 from t1 = " + volatileIntT11);
                         v1 = volatileIntT11;
                     }
                 }
@@ -299,8 +381,10 @@ public class MultiTest1 {
             public void run() {
                 int v2 = volatileIntT11;
                 while(true) {
+                    write("\n going to increment = " + volatileIntT11);
                     ++volatileIntT11;
                     System.out.println("incremented = " + volatileIntT11);
+                    write("\n incremented = " + volatileIntT11);
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -309,10 +393,107 @@ public class MultiTest1 {
                     System.out.println();
                 }
             }
+
         };
 
         t1.start();
         t2.start();
     }
+
+    private static int volatileIntT12 = 0;
+
+    private static void t12() {
+        class MyThread extends Thread {
+
+            public boolean increment;
+
+            @Override
+            public void run() {
+                int v1 = volatileIntT12;
+                while (true) {
+                    if (v1 != volatileIntT12) {
+                        System.out.println("volatileIntT11 = " + volatileIntT12 + " - " + Thread.currentThread().getName());
+                        v1 = volatileIntT12;
+                    }
+
+                    if(increment) {
+                        volatileIntT12++;
+                        System.out.println("incremented to " + volatileIntT12 + " - " + Thread.currentThread().getName());
+                    }
+
+//                    try {
+//                        Thread.sleep(500);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+
+//                    System.out.println();
+
+                }
+            }
+        }
+
+        MyThread t1 = new MyThread();
+        t1.increment = true;
+        t1.start();
+
+        MyThread t2 = new MyThread();
+        t2.start();
+    }
+
+    static int data = 0;
+    static AtomicBoolean run = new AtomicBoolean(true);
+
+    private static void t13() {
+        new Thread(new Runnable() {
+            public void run() {
+                while (run.get()); // spin-lock / busy-wait
+                System.out.println(data);
+            }
+        }).start();
+
+        data = 1;
+        run.set(false);
+    }
+
+    static int data14 = 0;
+    static AtomicBoolean run14 = new AtomicBoolean(true);
+
+    private static void t14() {
+        new Thread(new Runnable() {
+            public void run() {
+                while (run14.get()); // spin-lock / busy-wait
+                System.out.println(data14);
+            }
+        }).start();
+
+        data14 = 1;
+        run14.set(false);
+    }
+
+    static int data15 = 0;
+    static volatile boolean[] run15 = {true};
+
+    private static void t15() {
+        new Thread(new Runnable() {
+            public void run() {
+                while (run15[0]); // spin-lock / busy-wait
+                System.out.println(data15);
+            }
+        }).start();
+
+        data15 = 1;
+        run15[0] = false;
+    }
+
+    /**
+     * https://stackoverflow.com/questions/17349071/are-the-effects-of-not-using-volatile-keyword-platform-specific/17590035#17590035
+     */
+
+    /**
+     java version "1.7.0_65"
+     Java(TM) SE Runtime Environment (build 1.7.0_65-b17)
+     Java HotSpot(TM) 64-Bit Server VM (build 24.65-b04, mixed mode)
+     */
 
 }
