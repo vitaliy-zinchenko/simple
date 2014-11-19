@@ -1,23 +1,29 @@
 package multi;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by zinchenko on 16.11.14.
  */
 public class MultiTest1 {
 
-    public static void main(String[] args) throws InterruptedException, ExecutionException {
+    public static void main(String[] args) throws Exception {
 
-        t15();
+        t25();
 
     }
 
@@ -495,5 +501,240 @@ public class MultiTest1 {
      Java(TM) SE Runtime Environment (build 1.7.0_65-b17)
      Java HotSpot(TM) 64-Bit Server VM (build 24.65-b04, mixed mode)
      */
+
+    private static void t16() {
+        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("HI after 5s!");
+            }
+        }, 0, 5, TimeUnit.SECONDS);
+    }
+
+    private static void t17() {
+        Timer timer = new Timer();
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("H");
+            }
+        }, 3000);
+    }
+
+    private static volatile int counter18 = 0;
+
+    private static void t18() throws InterruptedException {
+        class MyThread extends Thread {
+            @Override
+            public void run() {
+                for (int i = 0; i < 10_000_000; i++) {
+                    counter18++;
+                }
+            }
+        }
+
+        MyThread t1 = new MyThread();
+        t1.start();
+        MyThread t2 = new MyThread();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        System.out.println(counter18);
+    }
+
+    private static volatile AtomicInteger counter19 = new AtomicInteger(0);
+
+    private static void t19() throws InterruptedException {
+        class MyThread extends Thread {
+            @Override
+            public void run() {
+                for (int i = 0; i < 10_000_000; i++) {
+//                    synchronized (counter19) {
+                        counter19.incrementAndGet();
+//                    }
+                }
+            }
+        }
+
+        MyThread t1 = new MyThread();
+        t1.start();
+        MyThread t2 = new MyThread();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        System.out.println(counter19);
+    }
+
+    private static volatile MutableInt counter20 = new MutableInt(0);
+
+    private static void t20() throws InterruptedException {
+        class MyThread extends Thread {
+            @Override
+            public void run() {
+                for (int i = 0; i < 10_000_000; i++) {
+                    synchronized (counter20) {
+                        counter20.setValue(counter20.intValue() + 1);
+                    }
+                }
+            }
+        }
+
+        MyThread t1 = new MyThread();
+        t1.start();
+        MyThread t2 = new MyThread();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        System.out.println(counter20);
+    }
+
+    // synchronized and exceptions
+
+    private static void t21() throws Exception {
+        final Object mon = new Object();
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                synchronized (mon) {
+                    System.out.println("t s");
+//                    try {
+//                        Thread.sleep(10000000);
+//                        mon.wait(100);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+                }
+            }
+        };
+
+        thread.start();
+
+        synchronized (mon) {
+            System.out.println("main s");
+
+            if(true) {
+                throw new RuntimeException();
+            }
+
+//            try {
+//                Thread.sleep(10000000);
+//                mon.wait(100);
+//                System.out.println("after wait");
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+
+        }
+
+    }
+
+    private static void t22() throws Exception {
+        System.out.println("main sleep");
+        Thread.sleep(10_000);
+        System.out.println("main started");
+
+        class MyThread extends Thread {
+            @Override
+            public void run() {
+                    System.out.println("run - " + Thread.currentThread().getName());
+                    try {
+                        Thread.sleep(1000000000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+        };
+
+
+//        System.out.println("create t loop");
+//        for (int i = 0; i < 500; i++) {
+//            System.out.println("i="+i);
+//            new MyThread().start();
+//        }
+
+        try {
+            System.out.println("end sleep");
+            Thread.sleep(1000000000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void t23() throws Exception {
+        Object o = null;
+        if(false) {
+            o = new Object();
+        }
+        synchronized (o) {
+            System.out.println("in s");
+        }
+    }
+
+    private static void t24() throws Exception {
+        List<String> list = new CopyOnWriteArrayList<>();
+        list.add("A");
+        Iterator<String> iterA = list.iterator();
+        list.add("B");
+        Iterator<String> iterAB = list.iterator();
+        list.add("C");
+        Iterator<String> iterABC = list.iterator();
+
+        System.out.println("list:  " + list);
+        System.out.print("iterAB:");
+        while (iterAB.hasNext()) {
+            System.out.print(" " + iterAB.next() + ",");
+        }
+    }
+
+    private static void t25() throws Exception {
+        final List<String> list = new CopyOnWriteArrayList<>();
+
+        Thread t1 = new Thread() {
+            @Override
+            public void run() {
+                while (true) {
+                    list.add("t1 -" + Thread.currentThread().getName());
+                    try {
+                        System.out.println("sleep");
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        t1.start();
+
+        try {
+            System.out.println("main sleep");
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("all:");
+        System.out.println(list.toString());
+
+        for (String s: list) {
+            try {
+                System.out.println("s="+s);
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
 
 }

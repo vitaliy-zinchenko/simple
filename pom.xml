@@ -277,38 +277,27 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>-Xms300m</argument>
+                        <argument>-Xmx600m</argument>
+                        <argument>-XX:NewRatio=3</argument>
+                        <argument>-XX:+PrintGCTimeStamps</argument>
+                        <argument>-XX:+PrintGCDetails</argument>
+                        <argument>-Xloggc:gc.log</argument>
+                        <argument>-classpath</argument>
+                        <classpath/>
+                        <argument>multi.MultiTest1</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
         </plugins>
         <finalName>simple</finalName>
-        <!--<plugins>-->
-
-            <!--<plugin>-->
-                <!--<groupId>org.codehaus.mojo</groupId>-->
-                <!--<artifactId>exec-maven-plugin</artifactId>-->
-                <!--<version>1.2.1</version>-->
-                <!--<configuration>-->
-                    <!--<executable>java</executable>-->
-                    <!--<arguments>-->
-                        <!--<argument>-Xms300m</argument>-->
-                        <!--<argument>-Xmx600m</argument>-->
-                        <!--<argument>-XX:NewRatio=3</argument>-->
-                        <!--<argument>-XX:+PrintGCTimeStamps</argument>-->
-                        <!--<argument>-XX:+PrintGCDetails</argument>-->
-                        <!--<argument>-Xloggc:gc.log</argument>-->
-                        <!--<argument>-classpath</argument>-->
-                        <!--<classpath/>-->
-                        <!--<argument>jvm.T</argument>-->
-                    <!--</arguments>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
-
-            <!--<plugin>-->
-                <!--<artifactId>maven-compiler-plugin</artifactId>-->
-                <!--<version>3.0</version>-->
-                <!--<configuration>-->
-                    <!--<source>1.7</source>-->
-                    <!--<target>1.7</target>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
-        <!--</plugins>-->
     </build>
 </project>
