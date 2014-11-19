@@ -1,2 +1,3 @@
-http://example.com/archive.zip my_archive.zip
-http://example.com/image.jpg picture.jpg
+http://s0.tchkcdn.com/fun/g2/s/1/1/6/9/22169/1877929304.jpeg my_archive.jpeg
+
+http://s1.tchkcdn.com/fun/g2/s/1/9/4/7/20947/1641060800.jpeg picture.jpeg

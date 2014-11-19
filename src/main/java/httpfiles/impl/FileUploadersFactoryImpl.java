@@ -15,21 +15,24 @@ import java.util.Collection;
  */
 public class FileUploadersFactoryImpl implements FileUploadersFactory {
 
+    public static final String SPLIT = "\\s";
+
     @Override
     public Collection<FileUploader> createFileUploaders(InputStream source) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(source));
         String line = reader.readLine();
         Collection<FileUploader> uploaders = new ArrayList<>();
-        while(line != null) {
-            uploaders.add(buildFileUploader(line));
+        for (int i = 0; line != null; i++) {
+            uploaders.add(buildFileUploader(i+1, line));
             line = reader.readLine();
         }
         return uploaders;
     }
 
-    private FileUploader buildFileUploader(String line) {
-        String[] tokens = line.split("\\s");
-        return new FileUploader(tokens[0], tokens[1]);
+    private FileUploader buildFileUploader(int number, String line) {
+        String[] tokens = line.split(SPLIT);
+        String filename = tokens.length > 1 ? tokens[1] : null;
+        return new FileUploader(number, tokens[0], filename);
     }
 
 }
