@@ -9,6 +9,8 @@ public class UploadResult {
 
     private int bytes;
 
+    private int totalSize;
+
     public void incrementCount() {
         successCount++;
     }
@@ -27,5 +29,17 @@ public class UploadResult {
 
     public void setBytes(int bytes) {
         this.bytes = bytes;
+    }
+
+    public int getTotalSize() {
+        return totalSize;
+    }
+
+    public void setTotalSize(int totalSize) {
+        this.totalSize = totalSize;
+    }
+
+    public void addTotalSize(int size) {
+        this.totalSize += size;
     }
 }

@@ -1,5 +1,6 @@
 package httpfiles;
 
+import httpfiles.impl.FileUploaderImpl;
 import httpfiles.impl.FileUploadersFactoryImpl;
 
 import java.io.FileInputStream;
@@ -22,15 +23,15 @@ public class UploadService {
 
     FileUploadersFactory factory;
 
-    public UploadService() {
-        factory = new FileUploadersFactoryImpl();
+    public UploadService(UploadContext uploadContext) {
+        factory = new FileUploadersFactoryImpl(uploadContext);
     }
 
     public void upload(UploadContext context) {
         try {
             InputStream stream = new FileInputStream(context.getSource());
 
-            Collection<FileUploader> fileUploaders = factory.createFileUploaders(stream);
+            Collection<FileUploaderImpl> fileUploaders = factory.createFileUploaders(stream);
 
             ExecutorService executorService = Executors.newFixedThreadPool(context.getThreadsNumber());
             List<Future<ItemUploadResult>> resultFutures = executorService.invokeAll(fileUploaders);
@@ -38,7 +39,7 @@ public class UploadService {
             UploadResult uploadResult = extractResult(resultFutures);
 
             LOGGER.info(MessageFormat.format("Finished. {0} file(s) was uploaded. {1} bytes was uploaded.",
-                    uploadResult.getSuccessCount()));
+                    uploadResult.getSuccessCount(), uploadResult.getTotalSize()));
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error while uploading files", e);
         }
@@ -52,6 +53,7 @@ public class UploadService {
                 result = future.get();
                 if (result.isSuccess()) {
                     uploadResult.incrementCount();
+                    uploadResult.addTotalSize(result.getSize());
                     continue;
                 }
                 logErrors(result);

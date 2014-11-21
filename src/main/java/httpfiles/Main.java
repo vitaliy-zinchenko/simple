@@ -17,11 +17,12 @@ import java.util.logging.Logger;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        UploadService service = new UploadService();
         UploadContext uploadContext = new UploadContext();
         uploadContext.setThreadsNumber(5);
-        uploadContext.setDestination("/home/zinchenko/Загрузки/test");
-        uploadContext.setSource("/home/zinchenko/work/projects/zinjvi/simple/src/main/resources/httpfiles/file.txt");
+        uploadContext.setDestination("/home/zinchenko/Downloads/test");
+        uploadContext.setSource("/home/zinchenko/work/my/project/simple/src/main/resources/httpfiles/file.txt");
+
+        UploadService service = new UploadService(uploadContext);
         service.upload(uploadContext);
 
     }

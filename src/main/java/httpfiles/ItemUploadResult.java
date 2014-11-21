@@ -12,6 +12,8 @@ public class ItemUploadResult {
 
     private int lineNumber;
 
+    private int size;
+
     public ItemUploadResult(int lineNumber) {
         this.lineNumber = lineNumber;
     }
@@ -32,4 +34,11 @@ public class ItemUploadResult {
         errors.add(error);
     }
 
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
 }

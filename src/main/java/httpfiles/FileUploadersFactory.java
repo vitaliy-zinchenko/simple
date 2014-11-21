@@ -1,5 +1,7 @@
 package httpfiles;
 
+import httpfiles.impl.FileUploaderImpl;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -9,6 +11,6 @@ import java.util.Collection;
  */
 public interface FileUploadersFactory {
 
-    Collection<FileUploader> createFileUploaders(InputStream source) throws IOException;
+    Collection<FileUploaderImpl> createFileUploaders(InputStream source) throws IOException;
 
 }
