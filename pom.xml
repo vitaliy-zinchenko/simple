@@ -285,15 +285,15 @@
                 <configuration>
                     <executable>java</executable>
                     <arguments>
-                        <argument>-Xms300m</argument>
-                        <argument>-Xmx600m</argument>
+                        <argument>-Xms20m</argument>
+                        <argument>-Xmx20m</argument>
                         <argument>-XX:NewRatio=3</argument>
                         <argument>-XX:+PrintGCTimeStamps</argument>
                         <argument>-XX:+PrintGCDetails</argument>
                         <argument>-Xloggc:gc.log</argument>
                         <argument>-classpath</argument>
                         <classpath/>
-                        <argument>multi.MultiTest1</argument>
+                        <argument>jvm.T2</argument>
                     </arguments>
                 </configuration>
             </plugin>
