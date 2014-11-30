@@ -23,7 +23,7 @@ public class MultiTest1 {
 
     public static void main(String[] args) throws Exception {
 
-        t25();
+        t22();
 
     }
 
@@ -639,12 +639,15 @@ public class MultiTest1 {
 
     private static void t22() throws Exception {
         System.out.println("main sleep");
-        Thread.sleep(10_000);
+//        Thread.sleep(10_000);
         System.out.println("main started");
+
+        final Object o = new Object();
 
         class MyThread extends Thread {
             @Override
             public void run() {
+                synchronized (o) {
                     System.out.println("run - " + Thread.currentThread().getName());
                     try {
                         Thread.sleep(1000000000);
@@ -652,18 +655,23 @@ public class MultiTest1 {
                         e.printStackTrace();
                     }
                 }
+            }
         };
 
 
 //        System.out.println("create t loop");
 //        for (int i = 0; i < 500; i++) {
 //            System.out.println("i="+i);
-//            new MyThread().start();
+            new MyThread().start();
 //        }
 
         try {
-            System.out.println("end sleep");
-            Thread.sleep(1000000000);
+            synchronized (o) {
+                System.out.println("end sleep");
+//                o.wait();
+                System.out.println("_");
+                Thread.sleep(1000000000);
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
