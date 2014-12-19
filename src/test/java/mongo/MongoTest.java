@@ -13,6 +13,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.QueryBuilder;
 import com.mongodb.WriteResult;
 import de.flapdoodle.embed.mongo.tests.MongodForTestsFactory;
+import org.bson.types.ObjectId;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
 
@@ -402,5 +403,52 @@ public class MongoTest {
 
     }
 
+    @Test
+    public void update_replace() {
+        DBCollection c = getCollection();
+
+        BasicDBObject toInsert = new BasicDBObject("name", "Qwc").append("email", "qwe@qwe.qwe");
+        WriteResult wr = c.insert(toInsert);
+        Object id = toInsert.get("_id");
+
+        DBObject object = c.findOne(new BasicDBObject("_id", id));
+        object.put("email", "new@qwe.qwe");
+
+        c.update(new BasicDBObject("_id", id), object);
+
+        DBObject result = c.findOne(new BasicDBObject("_id", id));
+
+        assertEquals("new@qwe.qwe", result.get("email"));
+    }
+
+    @Test
+    public void update_set() {
+        DBCollection c = getCollection();
+
+        BasicDBObject toInsert = new BasicDBObject("name", "Qwc").append("email", "qwe@qwe.qwe");
+        WriteResult wr = c.insert(toInsert);
+        Object id = toInsert.get("_id");
+
+        c.update(new BasicDBObject("_id", id), new BasicDBObject("$set", new BasicDBObject("email", "new@qqq.qqq")));
+
+        DBObject result = c.findOne(new BasicDBObject("_id", id));
+
+        assertEquals("new@qqq.qqq", result.get("email"));
+    }
+
+    @Test
+    public void update_addToArray() {
+        DBCollection c = getCollection();
+
+        BasicDBObject toInsert = new BasicDBObject("name", "Qwc").append("emails", new String[]{"q@q.q", "a@a.a"});
+        WriteResult wr = c.insert(toInsert);
+        Object id = toInsert.get("_id");
+
+        c.update(new BasicDBObject("_id", id), new BasicDBObject("$push", new BasicDBObject("emails", "new@n.n")));
+
+        DBObject result = c.findOne(new BasicDBObject("_id", id));
+
+        assertEquals(3, ((List)result.get("emails")).size());
+    }
 
 }
