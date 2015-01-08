@@ -1,22 +1,12 @@
 package mongo;
 
-import com.mongodb.AggregationOutput;
-import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.BulkWriteOperation;
-import com.mongodb.Cursor;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.QueryBuilder;
-import com.mongodb.WriteResult;
+import com.mongodb.*;
 import de.flapdoodle.embed.mongo.tests.MongodForTestsFactory;
 import org.bson.types.ObjectId;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
 
+import static com.mongodb.BasicDBObjectBuilder.start;
 import static com.mongodb.QueryOperators.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -26,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import de.flapdoodle.embed.mongo.distribution.Version;
 import org.junit.Test;
@@ -51,22 +42,27 @@ public class MongoTest {
 
     @BeforeClass
     public static void setMongoDB() throws IOException {
-        System.setProperty("DEBUG.MONGO", "true");
-        System.setProperty("DB.TRACE", "true");
-
-        testsFactory = MongodForTestsFactory.with(Version.Main.PRODUCTION);
+//        System.setProperty("DEBUG.MONGO", "true");
+//        System.setProperty("DB.TRACE", "true");
+//        testsFactory = MongodForTestsFactory.with(Version.Main.PRODUCTION);
     }
 
     @AfterClass
     public static void tearDownMongoDB() throws Exception {
-        testsFactory.shutdown();
+//        testsFactory.shutdown();
     }
 
     @Before
     public void setUpMongoDB() throws Exception {
-        mongo = testsFactory.newMongo();
-        dbName = UUID.randomUUID().toString();
-        db = mongo.getDB(dbName);
+//        mongo = testsFactory.newMongo();
+//        dbName = UUID.randomUUID().toString();
+//        db = mongo.getDB(dbName);
+
+
+        MongoClient mongoClient = new MongoClient("localhost", 27017);
+        db = mongoClient.getDB("mongoTest");
+
+        getCollection().remove(start().get());
     }
 
     private void p(String s) {
@@ -253,16 +249,16 @@ public class MongoTest {
         {
             DBCollection c = getCollection();
 
-            c.insert(BasicDBObjectBuilder.start("comment", "Qwer asd zxc").get());
-            c.insert(BasicDBObjectBuilder.start("comment", "Fghj vbnm hjk").get());
-            c.insert(BasicDBObjectBuilder.start("comment", "Qwer jkl bnm").get());
-            c.insert(BasicDBObjectBuilder.start("comment", "Uiop asd sdf").get());
-            c.insert(BasicDBObjectBuilder.start("comment", "Cvbnm asd sdf").get());
+            c.insert(start("comment", "Qwer asd zxc").get());
+            c.insert(start("comment", "Fghj vbnm hjk").get());
+            c.insert(start("comment", "Qwer jkl bnm").get());
+            c.insert(start("comment", "Uiop asd sdf").get());
+            c.insert(start("comment", "Cvbnm asd sdf").get());
 
-            c.createIndex(BasicDBObjectBuilder.start("comment", "text").get());
+            c.createIndex(start("comment", "text").get());
 
-            DBCursor cursor = c.find(BasicDBObjectBuilder.start("$text",
-                BasicDBObjectBuilder.start("$search", "asd").get()).get());
+            DBCursor cursor = c.find(start("$text",
+                    start("$search", "asd").get()).get());
 
             assertEquals(3, cursor.count());
 
@@ -273,7 +269,7 @@ public class MongoTest {
 
             //~~~~~~~~~~~~~~
 
-            cursor = c.find(BasicDBObjectBuilder.start("$text", BasicDBObjectBuilder.start("$search", "Qwer asd").get()).get());
+            cursor = c.find(start("$text", start("$search", "Qwer asd").get()).get());
 
             assertEquals(4, cursor.count());
         }
@@ -284,25 +280,25 @@ public class MongoTest {
         DBCollection c = getCollection();
 
 
-        c.insert(BasicDBObjectBuilder.start("name", "name-1").append("age", 1).get());
-        c.insert(BasicDBObjectBuilder.start("name", "name-2").append("age", 1).get());
-        c.insert(BasicDBObjectBuilder.start("name", "name-3").append("age", 1).get());
-        c.insert(BasicDBObjectBuilder.start("name", "name-4").append("age", 2).get());
-        c.insert(BasicDBObjectBuilder.start("name", "name-5").append("age", 2).get());
-        c.insert(BasicDBObjectBuilder.start("name", "name-6").append("age", 2).get());
-        c.insert(BasicDBObjectBuilder.start("name", "name-7").append("age", 2).get());
-        c.insert(BasicDBObjectBuilder.start("name", "name-8").append("age", 3).get());
-        c.insert(BasicDBObjectBuilder.start("name", "name-9").append("age", 3).get());
-        c.insert(BasicDBObjectBuilder.start("name", "name-10").append("age", 3).get());
+        c.insert(start("name", "name-1").append("age", 1).get());
+        c.insert(start("name", "name-2").append("age", 1).get());
+        c.insert(start("name", "name-3").append("age", 1).get());
+        c.insert(start("name", "name-4").append("age", 2).get());
+        c.insert(start("name", "name-5").append("age", 2).get());
+        c.insert(start("name", "name-6").append("age", 2).get());
+        c.insert(start("name", "name-7").append("age", 2).get());
+        c.insert(start("name", "name-8").append("age", 3).get());
+        c.insert(start("name", "name-9").append("age", 3).get());
+        c.insert(start("name", "name-10").append("age", 3).get());
 
-        c.createIndex(BasicDBObjectBuilder.start("age", 1).append("name", 1).get());
+        c.createIndex(start("age", 1).append("name", 1).get());
 //        c.createIndex(BasicDBObjectBuilder.start("age", 1).get());
 
         p(c.getIndexInfo());
 
 //        DBObject explain = c.find(BasicDBObjectBuilder.start("name", "name-1").append("age", 1).get()).explain();
-        DBCursor cursor = c.find(BasicDBObjectBuilder.start("age", 1).get(),
-                BasicDBObjectBuilder.start("name", true).append("_id", false).get());
+        DBCursor cursor = c.find(start("age", 1).get(),
+                start("name", true).append("_id", false).get());
 
         p(cursor.toArray());
         p(cursor.explain());
@@ -338,7 +334,7 @@ public class MongoTest {
         morphiaBean.setName("qqq");
         datastore.save(morphiaBean);
 
-        assertEquals(1, getCollection(MORPHIA_BEAN).find(BasicDBObjectBuilder.start("name", "qqq").get()).count());
+        assertEquals(1, getCollection(MORPHIA_BEAN).find(start("name", "qqq").get()).count());
 
         List<MorphiaBean> l = datastore.find(MorphiaBean.class)
                 .field("name").equal("qqq").asList();
@@ -350,23 +346,23 @@ public class MongoTest {
     public void aggregate() throws Exception {
         DBCollection c = getCollection();
 
-        c.insert(BasicDBObjectBuilder.start("name", "name-1")
+        c.insert(start("name", "name-1")
                 .append("type", "a").append("age", 1)
                 .get());
 
-        c.insert(BasicDBObjectBuilder.start("name", "name-1_1")
+        c.insert(start("name", "name-1_1")
                 .append("type", "a").append("age", 2)
                 .get());
 
-        c.insert(BasicDBObjectBuilder.start("name", "name-2")
+        c.insert(start("name", "name-2")
                 .append("type", "a").append("age", 4)
                 .get());
 
-        c.insert(BasicDBObjectBuilder.start("name", "name-3")
+        c.insert(start("name", "name-3")
                 .append("type", "b").append("age", 6)
                 .get());
 
-        c.insert(BasicDBObjectBuilder.start("name", "name-3_2")
+        c.insert(start("name", "name-3_2")
                 .append("type", "b").append("age", 1)
                 .get());
 
@@ -375,8 +371,8 @@ public class MongoTest {
 //        pipeline.add(BasicDBObjectBuilder.start("$match",
 //                BasicDBObjectBuilder.start("age", new BasicDBObject("$gt", 1)).get()).get());
 
-        pipeline.add(BasicDBObjectBuilder.start("$group",
-                BasicDBObjectBuilder.start("_id", new BasicDBObject("type", "$type").append("age", "$age"))
+        pipeline.add(start("$group",
+                start("_id", new BasicDBObject("type", "$type").append("age", "$age"))
                         .append("total", new BasicDBObject("$sum", 1)).get()).get());
 
         AggregationOutput output = c.aggregate(pipeline);
@@ -404,6 +400,7 @@ public class MongoTest {
     }
 
     @Test
+<<<<<<< HEAD
     public void update_replace() {
         DBCollection c = getCollection();
 
@@ -450,5 +447,359 @@ public class MongoTest {
 
         assertEquals(3, ((List)result.get("emails")).size());
     }
+=======
+    public void range_0() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "name-1").append("age", 1).get());
+        c.insert(start("name", "name-2").append("age", 2).get());
+        c.insert(start("name", "name-3").append("age", 3).get());
+        c.insert(start("name", "name-4").append("age", 4).get());
+
+        List<DBObject> list = c.find(start("age", start("$gte", 2).append("$lte", 3).get()).get()).toArray();
+
+        assertEquals(2, list.size());
+    }
+
+    @Test
+    public void in_0() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "name-1").append("age", 1).get());
+        c.insert(start("name", "name-2").append("age", 2).get());
+        c.insert(start("name", "name-3").append("age", 3).get());
+        c.insert(start("name", "name-4").append("age", 4).get());
+
+        List<DBObject> list = getCollection()
+                .find(
+                        start("name",
+                                start("$in", new String[]{"name-2", "name-4"}).get()
+                        ).get()
+                ).toArray();
+
+        assertEquals(2, list.get(0).get("age"));
+        assertEquals(4, list.get(1).get("age"));
+
+    }
+
+    @Test
+    public void in_1() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "name-1").append("age", 1).append("tags", new String[]{"t1", "t2"}).get());
+        c.insert(start("name", "name-2").append("age", 2).append("tags", new String[]{"t1", "t3"}).get());
+        c.insert(start("name", "name-3").append("age", 3).append("tags", new String[]{"t2", "t1"}).get());
+        c.insert(start("name", "name-4").append("age", 4).append("tags", new String[]{"t4", "t3"}).get());
+
+        List<DBObject> list = getCollection()
+                .find(
+                        start("tags",
+                                start("$in", new String[]{"t1"}).get()
+                        ).get()
+                ).toArray();
+
+        assertEquals(3, list.size());
+
+        assertEquals(1, list.get(0).get("age"));
+        assertEquals(2, list.get(1).get("age"));
+        assertEquals(3, list.get(2).get("age"));
+
+    }
+
+    @Test
+    public void in_2_$elemMatch() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "name-1").append("age", 1).append("tags",
+                new Object[]{new BasicDBObject("name", "t1").append("id", 11), new BasicDBObject("name", "t2").append("id", 12)}).get());
+        c.insert(start("name", "name-2").append("age", 2).append("tags",
+                new Object[]{new BasicDBObject("name", "t2").append("id", 11), new BasicDBObject("name", "t3").append("id", 13)}).get());
+        c.insert(start("name", "name-3").append("age", 3).append("tags",
+                new Object[]{new BasicDBObject("name", "t1").append("id", 11), new BasicDBObject("name", "t3").append("id", 13)}).get());
+        c.insert(start("name", "name-4").append("age", 4).append("tags",
+                new Object[]{new BasicDBObject("name", "t4").append("id", 13)}).get());
+
+        List<DBObject> list = getCollection()
+                .find(
+                        start("tags",
+                                start("$elemMatch",
+                                        start("name",
+                                                start("$in", new String[]{"t1"}).get()
+                                        ).get()
+                                ).get()
+                        ).get()
+                ).toArray();
+
+        assertEquals(2, list.size());
+
+        assertEquals(1, list.get(0).get("age"));
+        assertEquals(3, list.get(1).get("age"));
+
+    }
+
+    @Test
+    public void nin_0() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "name-1").append("age", 1).get());
+        c.insert(start("name", "name-2").append("age", 2).get());
+        c.insert(start("name", "name-3").append("age", 3).get());
+        c.insert(start("name", "name-4").append("age", 4).get());
+
+        List<DBObject> list = getCollection()
+                .find(
+                        start("name",
+                                start("$nin", new String[]{"name-2", "name-4"}).get()
+                        ).get()
+                ).toArray();
+
+        assertEquals(1, list.get(0).get("age"));
+        assertEquals(3, list.get(1).get("age"));
+
+    }
+
+    @Test
+    public void all_0() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "name-1").append("age", 1).append("tags", new String[]{"t1", "t2"}).get());
+        c.insert(start("name", "name-2").append("age", 2).append("tags", new String[]{"t1", "t3"}).get());
+        c.insert(start("name", "name-3").append("age", 3).append("tags", new String[]{"t2", "t1"}).get());
+        c.insert(start("name", "name-4").append("age", 4).append("tags", new String[]{"t4", "t3"}).get());
+
+        List<DBObject> list = getCollection()
+                .find(
+                        start("tags",
+                                start("$all", new String[]{"t1", "t2"}).get()
+                        ).get()
+                ).toArray();
+
+        assertEquals(1, list.get(0).get("age"));
+        assertEquals(3, list.get(1).get("age"));
+
+    }
+
+    @Test
+    public void regex_0() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "Aqw-1").append("age", 1).get());
+        c.insert(start("name", "Qwe-2").append("age", 2).get());
+        c.insert(start("name", "Zxc-3").append("age", 3).get());
+        c.insert(start("name", "Sdf-4").append("age", 4).get());
+
+        List<DBObject> list = getCollection().find(start("name", Pattern.compile(".qw.")).get()).toArray();
+
+        assertEquals(1, list.size());
+
+        assertEquals(1, list.get(0).get("age"));
+
+    }
+
+    @Test
+    public void regex_$not_0() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "Aqw-1").append("age", 1).get());
+        c.insert(start("name", "Qwe-2").append("age", 2).get());
+        c.insert(start("name", "Zxc-3").append("age", 3).get());
+        c.insert(start("name", "Sdf-4").append("age", 4).get());
+
+        List<DBObject> list = getCollection().find(start("name",
+                start("$not", Pattern.compile(".qw.")).get()
+        ).get()).toArray();
+
+        assertEquals(3, list.size());
+    }
+
+    @Test
+    public void $exists_0() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "Aqw-1").append("age", 1).get());
+        c.insert(start("name", "Qwe-2").append("value", "vvv").get());
+        c.insert(start("name", "Zxc-3").append("age", 3).get());
+        c.insert(start("name", "Sdf-4").append("age", 4).get());
+
+        List<DBObject> list = getCollection().find(start("value",
+                start("$exists", true).get()
+        ).get()).toArray();
+
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    public void $exists_1() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "Aqw-1").append("age", 1).get());
+        c.insert(start("name", "Qwe-2").append("value", "vvv").get());
+        c.insert(start("name", "Zxc-3").append("age", 3).get());
+        c.insert(start("name", "Sdf-4").append("age", 4).get());
+
+        List<DBObject> list = getCollection().find(start("value", null).get()).toArray();
+
+        assertEquals(3, list.size());
+    }
+
+    @Test
+    public void $exists_2() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "Aqw-1").append("age", 1).get());
+        c.insert(start("name", "Qwe-2").append("value", "vvv").get());
+        c.insert(start("name", "Zxc-3").append("age", 3).get());
+        c.insert(start("name", "Sdf-4").append("age", 4).get());
+
+        List<DBObject> list = getCollection().find(start("value",
+                start("$ne", null).get()
+            ).get()).toArray();
+
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    public void array_0() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "n-1").append("array", new String[]{"qw", "as"}).get());
+        c.insert(start("name", "n-2").append("array", new String[]{"sd", "xc"}).get());
+
+        List<DBObject> list = getCollection().find(start("array.0", "qw").get()).toArray();
+
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    public void o_2() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "n-1").append("o", start("k", "v").get()).get());
+
+        List<DBObject> list = getCollection().find(start("o.k", "v").get()).toArray();
+
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    public void js_0() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "n-1").append("age", 1).get());
+        c.insert(start("name", "n-2").append("age",5).get());
+
+        List<DBObject> list = getCollection().find(start("$where", "function() {return this.age > 3;}").get()).toArray();
+
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    public void js_1() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "n-1").append("age", 1).get());
+        c.insert(start("name", "n-2").append("age",5).get());
+
+        List<DBObject> list = getCollection().find(start("$where", "this.age > 3").get()).toArray();
+
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    public void js_2() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("name", "n-1").append("age", 1).get());
+        c.insert(start("name", "n-2").append("age",5).get());
+
+        String fn = "function() {" +
+                    "   print('message from js');" +
+                    "   return true;" +
+                    "}";
+
+        List<DBObject> list = getCollection().find(start("$where", fn).get()).toArray();
+        assertEquals(2, list.size());
+
+        List<DBObject> log = getCollection("temp_log").find(new BasicDBObject()).toArray();
+    }
+
+
+    @Test
+    public void map_reduce_0() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("type", "t-1").append("price", 10).get());
+        c.insert(start("type", "t-1").append("price", 15).get());
+        c.insert(start("type", "t-2").append("price", 5).get());
+        c.insert(start("type", "t-2").append("price", 1).get());
+
+        String map = "function() {" +
+                "   print('m~~~~~~~~~~~~');" +
+                "   var n = this.type;" +
+                "   emit(n, {'pr': this.price});" +
+                "}";
+
+        String reduce = "function(key, values) {" +
+                "   print('r~~~~~~~~~~~~');" +
+                "   var sum = 0;" +
+                "   values.forEach(function(doc) {" +
+                "       print(doc);" +
+                "       sum += doc.pr;" +
+                "   });" +
+                "   return {sum: sum};" +
+                "}";
+
+        MapReduceCommand command = new MapReduceCommand(c, map, reduce, null, MapReduceCommand.OutputType.INLINE, null);
+        MapReduceOutput output = getCollection().mapReduce(command);
+
+        for(DBObject dbObject: output.results()) {
+            System.out.println(dbObject);
+        }
+    }
+
+    @Test
+    public void distinct_0() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("type", "t-1").append("price", 10).get());
+        c.insert(start("type", "t-1").append("price", 15).get());
+        c.insert(start("type", "t-2").append("price", 5).get());
+        c.insert(start("type", "t-2").append("price", 1).get());
+
+        List list = c.distinct("type");
+
+        System.out.println(list);
+    }
+
+    @Test
+    public void distinct_2() throws Exception {
+        DBCollection c = getCollection();
+
+        c.insert(start("type", "t-1").append("tag", new String[]{"t1", "t2"}).append("price", 10).get());
+        c.insert(start("type", "t-1").append("tag", new String[]{"t1", "t3"}).append("price", 15).get());
+        c.insert(start("type", "t-2").append("tag", new String[]{"t24", "t23"}).append("price", 5).get());
+        c.insert(start("type", "t-2").append("tag", new String[]{"t44", "t43"}).append("price", 1).get());
+
+        List list = c.distinct("tag", new BasicDBObject("type", "t-1"));
+
+        System.out.println(list);
+    }
+
+    @Test
+    public void ref_() throws Exception {
+        DBCollection user = getCollection("user");
+        DBCollection role = getCollection("role");
+
+        user.insert(new BasicDBObject("name", "name-1").append("role_id", 1));
+        role.insert(new BasicDBObject("_id", 1).append("type", "admin"));
+
+        DBRef dbRef = new DBRef(db, "role", 1);
+
+//        List list =
+
+//        System.out.println(list);
+    }
+
+>>>>>>> c
 
 }

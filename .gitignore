@@ -1,3 +1,11 @@
 .idea/*
 *.iml
 target/*
+sub/jcr/target/*
+sub/spring-security/target/*
+sub/extjs/target/*
+sub/spring-security/.idea/*
+sub/extjs/.idea/*
+sub/hadoop/.idea/*
+sub/hadoop/target/*
+sub/jcr/.idea/*
