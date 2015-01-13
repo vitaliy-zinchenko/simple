@@ -1,8 +1,48 @@
-<users>
-    <user-qw1 email="test@email.we">
+<?xml version="1.0" encoding="UTF-8"?>
+<sv:node sv:name="users" xmlns:sv="http://www.jcp.org/jcr/sv/1.0">
 
-    </user-qw1>
-    <user-qw2 email="test2@email.we">
+    <sv:property sv:name="jcr:primaryType" sv:type="Name">
+        <sv:value>nt:unstructured</sv:value>
+    </sv:property>
 
-    </user-qw2>
-</users>
+    <sv:node sv:name="user-1">
+
+        <sv:property sv:name="jcr:primaryType" sv:type="Name">
+            <sv:value>nt:unstructured</sv:value>
+        </sv:property>
+
+        <sv:property sv:name="age" sv:type="Long">
+            <sv:value>12</sv:value>
+        </sv:property>
+
+        <!--<sv:property sv:name="jcr:primaryType" sv:type="Name">-->
+            <!--<sv:value>nt:query</sv:value>-->
+        <!--</sv:property>-->
+
+    </sv:node>
+
+    <sv:node sv:name="user-2">
+
+        <sv:property sv:name="jcr:primaryType" sv:type="Name">
+            <sv:value>nt:unstructured</sv:value>
+        </sv:property>
+
+        <sv:property sv:name="em" sv:type="String">
+            <sv:value>test-2@email.com</sv:value>
+        </sv:property>
+
+        <sv:node sv:name="address">
+
+            <sv:property sv:name="jcr:primaryType" sv:type="Name">
+                <sv:value>nt:unstructured</sv:value>
+            </sv:property>
+
+            <sv:property sv:name="street" sv:type="String">
+                <sv:value>test-street</sv:value>
+            </sv:property>
+
+        </sv:node>
+
+    </sv:node>
+
+</sv:node>
